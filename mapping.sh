@@ -149,12 +149,6 @@ samtools index daughter.bam
 
 # Variables definition
 FTP_SEQ_FOLDER=ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3 # Ftp folder from 1000Genomes project
-RUN_ID= # Read group identifier
-SAMPLE_NAME= # Sample
-INSTRUMENT_PLATFORM= # Platform/technology used to produce the read
-LIBRARY_NAME= # DNA preparation library identifier
-RUN_NAME= # Platform Unit
-INSERT_SIZE= # Insert size
 
 # Looking for the mother's SAMPLE_NAME
 wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/working/20130606_sample_info/20130606_g1k.pedwget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/working/20130606_sample_info/20130606_g1k.ped
@@ -226,7 +220,10 @@ wget ${FTP_SEQ_FOLDER}/20130502.phase3.analysis.sequence.index -O 20130502.phase
 # Input: tab-separated values file (.index)
 # Ouput: filtered comma-separated values file (.index)
 grep ${SAMPLE_NAME} 20130502.phase3.index | grep "exome" | grep 'PAIRED' | grep -v 'Catch-88526' | grep -v 'Solexa' | grep -v 'from blood' | grep -v '_1.filt.fastq.gz' | grep -v '_2.filt.fastq.gz' | sed 's/\t/,/g' > father.index
-# 'Catch-88526' est de très mauvaise qualité, c'est pourquoi on l'exclut
+# 'Catch-88526' est de très mauvaise qualité, c'est pourquoi on l'exclut. Même chose pour les runs 'Solexa' et 'from blood'.
+# sed permet d'introduire les séparateurs qui seront utiles dans la boucle plus bas pour la lecture des intitulés de colonnes et donc la définition des variables utiles.
+# Toutes les lignes sélectionnées sont envoyées dans un nouveau fichier father.index qui contient toutes les informations relatives à chaque run de séquençage pour le père.
+# Comme 1 run = 3 fichiers (séquences 1, séquences 2, séquences filtrées), on exclut ici les lignes relatives aux séquences 1 et 2 pour n'avoir qu'une seule ligne par run dans notre fichier.
 
 
 # File containing the list of alignments (each line is a .bam file)
@@ -234,7 +231,7 @@ grep ${SAMPLE_NAME} 20130502.phase3.index | grep "exome" | grep 'PAIRED' | grep 
 # Command: touch
 # Input: file name
 # Ouput: empty file (.bamlist)
-touch father.bamlist # creation of an empty file which name is "empty file"
+touch father.bamlist # creation of an empty file which name is "father.bamlist"
 
 # for each sequencing run (the first 10), align to the reference, sort, add read group and index
 
