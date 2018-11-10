@@ -24,7 +24,6 @@ class Cds(object):
                     print("At least one exon is overlapping with an other")
 
     def nt_position(self, position):
-    # Position ici vient du gtf et fait bien la distinction entre forward et reverse
         nt = -1
         running_sum = 0
         if self.strand == "+":
@@ -45,7 +44,7 @@ class Cds(object):
     def amino_acid(self, seq, position, nt_ref, nt_alt):
         """
         Returns the codon to which the SNP belongs and the corresponding amino 
-        acid both for the reference and the individual for interest. 
+        acid both for the reference and the individual of interest. 
         """
         assert (self.seq_length() % 3 == 0)
         assert (self.seq_length() == len(seq))
@@ -56,11 +55,11 @@ class Cds(object):
         if position_relative == -1:
             return("", "", "", "")
         
+        # To read the sequence in the good direction
         if self.strand == "-":
             nt_ref = complement[nt_ref]
             nt_alt = complement[nt_alt]
-            # Pour lire la séquence dans le bon sens
-
+            
         reste = position_relative % 3
         ref_codon = str(seq[position_relative - reste : position_relative - reste + 3])
         alt_codon = list(ref_codon)
@@ -74,7 +73,6 @@ class Cds(object):
         
         return ref_aa, alt_aa, ref_codon, alt_codon
 
-        # Should return the reference amino-acid, the alternative amino-acid, the reference codon and the alternative codon
 
     def empty_exon(self):
         return sum([1 for exon_len in self.exons_length() if exon_len == 1]) > 0

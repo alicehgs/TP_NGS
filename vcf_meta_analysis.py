@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 
+# Input: 3 .vcf files (Stop, Syn, Non-Syn) + metadata file 
+# Output: a .tsv file containing the number individuals, the number of of LoF SNPs taken into account in the analysis, Sigma^2/Va, and the result of the statistical test for each population 
+
+
 RED = "#EB6231"
 BLUE = "#5D80B4"
 GREEN = "#8FB03E"
