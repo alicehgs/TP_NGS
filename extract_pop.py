@@ -3,6 +3,8 @@
 import argparse
 import os
 
+# Permet de trier et d'extraire les individus et leurs informations relatives selon la population à laquelle ils appartiennent
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-p', '--panel', required=True, type=str,

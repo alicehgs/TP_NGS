@@ -5,6 +5,7 @@ import os
 
 
 class Cds(object):
+    # Définit de l'objet CDS
     def __init__(self, chromosome, strand, name):
         self.chromosome = chromosome
         self.strand = strand
@@ -26,12 +27,19 @@ class Cds(object):
 
     def exons_length(self):
         return [j - i + 1 for i, j in self.exons]
-    
-    def test_length(self):
-        return(self.seq_length()%3==0)
-         
+
     def seq_length(self):
         return sum(self.exons_length())
+
+    def test(self):
+        """
+        Test if the length of coding sequences is 3-divisible
+        
+        input: Cds object
+        output: a boolean
+        """
+        return self.seq_length()%3==0
+
 
     def befile_lines(self):
         lines = []
@@ -73,7 +81,7 @@ if __name__ == '__main__':
 
     dict_errors_info = {"NotConfirmed": "GTF file: {0} cds have a start or end that could not be confirmed",
                         "EmptyExon": "GTF file: {0} cds have at least one empty track",
-                       "NotCoding": "GTF file: {0} cds have an incorrect length"}
+                        "LengthError": "GTF file: {0} cds length is not a multiple of 3"}
 
     dict_errors_cds = {}
     for error in dict_errors_info:
@@ -82,8 +90,6 @@ if __name__ == '__main__':
     dict_cds, not_confirmed_tr = build_dict_cds(path, args.g)
 
     bedfile = open("{0}/{1}.bed".format(path, args.g[:-4]), 'w')
-    
-    
     for tr_id, cds in dict_cds.items():
 
         if tr_id in not_confirmed_tr:
@@ -93,11 +99,12 @@ if __name__ == '__main__':
         if cds.empty_exon():
             dict_errors_cds["EmptyExon"].append(tr_id)
             continue
-        
-        if not cds.test_length():
-            dict_errors_cds["NotCoding"].append(tr_id)
+
+        if not cds.test():
+            # Exclude CDS that do not fulfill the condition on coding sequence length
+            dict_errors_cds["LengthError"].append(tr_id)
             continue
-            
+
         for exon in cds.befile_lines():
             bedfile.write(exon)
 

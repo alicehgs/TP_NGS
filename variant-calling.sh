@@ -1,5 +1,5 @@
 #!/bin/bash
-WORK_DIR=/mnt/data/variant_calling
+WORK_DIR=/mnt/data/mapping
 cd ${WORK_DIR}
 
 ########################################################################################################################
@@ -75,7 +75,7 @@ java -jar ${PICARD} CreateSequenceDictionary \
 # Choose variable names
 # FILE_NAME=father # nom du fichier en .bam, sans l'extension (car juste après on définit l'input comme ${FILE_NAME}.bam)
 
-for FILE_NAME in "HG02024" "HG02025" "HG02026"
+for FILE_NAME in "HG02024" #"HG02025" "HG02026"
 do
 
 # Mark Duplicate reads
@@ -157,6 +157,10 @@ java -jar ${GATK} -T PrintReads \
 	-o ${FILE_NAME}.recal_reads.bam
 
 
+# Elimination de tout ce qui n'est pas dans les exons
+#bedtools intersect -header -a ${FILE_NAME}.recal_reads.bam -b exon.sorted.merged.gtf > ${FILE_NAME}.exome.recal_reads.bam
+
+
 ###################
 ### Call variants #
 ###################
@@ -167,7 +171,7 @@ java -jar ${GATK} -T PrintReads \
 # Output: Genomic variant calling file (.g.vcf)
 java -jar ${GATK} -T HaplotypeCaller \
                   -R ${REF_GENOME} \
-                  -I ${FILE_NAME}.recal_reads.bam \
+                  -I ${FILE_NAME}.exome_recal_reads.bam \
                   -o ${FILE_NAME}.g.vcf  \
                   --genotyping_mode DISCOVERY \
                   -variant_index_type LINEAR \

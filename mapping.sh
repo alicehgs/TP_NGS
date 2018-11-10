@@ -265,7 +265,7 @@ bwa mem -t 4 -M Homo_sapiens.Chr20.fa ${RUN_ID}_1.filt.fastq.gz ${RUN_ID}_2.filt
 
     # Append the file name (.bam) to the list of alignments that will be merged
     echo ${RUN_ID}.sorted.RG.bam >> father.bamlist
-done
+done #fin de la boucle
 
 # Merge the list of alignments into a single file
 # Command: samtools merge

@@ -70,10 +70,11 @@ pip3 install matplotlib --user
 
 cd ${INSTALL_DIR}
 
-for PYTHON_SCRIPT in ./*.py
+for PYTHON_SCRIPT in *.py
 do
 chmod a+x ${PYTHON_SCRIPT}
 done
 
 echo 'export PATH='$(pwd)':${PATH}' >> ~/.bashrc
 source ~/.bashrc
+# Dit au programme que les scripts pythons peuvent s'exécuter de n'importe où
