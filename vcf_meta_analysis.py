@@ -6,7 +6,7 @@ import argparse
 import os
 
 # Input: 3 .vcf files (Stop, Syn, Non-Syn) + metadata file 
-# Output: a .tsv file containing the number individuals, the number of of LoF SNPs taken into account in the analysis, Sigma^2/Va, and the result of the statistical test for each population 
+# Output: a .tsv file containing the number individuals, the number of of LoF SNPs taken into account in the analysis, Sigma^2/Va, and the result of the statistical test for each population.
 
 
 RED = "#EB6231"
@@ -15,18 +15,25 @@ GREEN = "#8FB03E"
 
 
 def build_array_from_vcf(path, vcf_name, _dict_pop, _dict_sample, _dict_sample_index, _cutoff):
-    array_pop_dict = dict()
+    """
+    Returns a subset of polymorphism from a .vcf file. Filtering criteria: minor allele count.
+    
+    input: a .vcf file, different dictionaries containing metadata information, cut-off for minor allele count.
+    output: an dictionary   - keys: populations
+                            - values: genotype arrays (rows: polymorphims / columns: individuals)
+    """
+    array_pop_dict = dict() # intialization of the output
     for population, sample_list in _dict_pop.items():
         array_pop_dict[population] = []
 
     header_list = []
     vcf_file = open("{0}/{1}".format(path, vcf_name), 'r')
-    for vcf_line in vcf_file:
-        if vcf_line[0] == "#":
+    for vcf_line in vcf_file: # each line of the .vcf file contains the genotype of different individuals for a given SNP
+        if vcf_line[0] == "#": 
             if vcf_line[1] != "#":
                 header_list = vcf_line.replace("\n", "").split("\t")
         else:
-            line_list = vcf_line.replace("\n", "").split("\t")
+            line_list = vcf_line.replace("\n", "").split("\t") # convert a line of the .vcf file into a list of genotypes
 
             line_pop_dict = dict()
             for population, sample_list in _dict_pop.items():
@@ -54,6 +61,10 @@ def build_array_from_vcf(path, vcf_name, _dict_pop, _dict_sample, _dict_sample_i
 
 
 def epistasis(array):
+    """
+    input: genotype array (rows: polymorphims / columns: individuals)
+    output: ratio of variances Sigma^2/Va
+    """
     va = np.sum([np.var(col) for col in array])
     s2 = np.var([np.sum(row) for row in array.T])
     return s2 / va
@@ -62,16 +73,15 @@ def epistasis(array):
 def bootstrap(nbr_snps, array, bootstrap_resample=1000):
     """
     input:
-        nbr_snps: size of the subsamples
+        nbr_snps: size of the samples
         array: vcf
         bootstrap_resample: number of bootstrap samples
-    ouput: list_ratio
-        
+    ouput: list_ratio: list of Sigma^2/Va for each bootstrap sample
     """
     row_nb, col_nb = np.shape(array)
-    assert(nbr_snps<=row_nb) #checks if the instance is correct
+    assert(nbr_snps<=row_nb) # checks if the instance is correct
     
-    list_ratio = [] #initialization of the output
+    list_ratio = [] # initialization of the output
     for i in range(bootstrap_resample): 
         sample_idx = np.random.choice(np.array(range(row_nb)), nbr_snps, replace = False) # randomly select nbr_snps rows in array 
         
@@ -107,7 +117,8 @@ if __name__ == '__main__':
     dict_pop = {}
     dict_sample_index = {}
     dict_sample = {}
-
+    
+    # read the metadata file (panel) 
     call_samples = open("{0}/{1}".format(os.getcwd(), args.p), 'r')
     call_samples.readline()
     for line in call_samples:
@@ -120,7 +131,8 @@ if __name__ == '__main__':
         dict_pop[pop].append(sample)
         dict_sample[sample] = pop
     call_samples.close()
-
+    
+    # creates arrays from the .vcf files given in input
     stop_array_dict = build_array_from_vcf(os.getcwd(), args.stop, dict_pop, dict_sample, dict_sample_index, args.c)
     print("Computed stop variants array for the whole population.")
     syn_array_dict = build_array_from_vcf(os.getcwd(), args.syn, dict_pop, dict_sample, dict_sample_index, args.c)
@@ -129,8 +141,8 @@ if __name__ == '__main__':
                                               args.c)
     print("Computed non-synonymous variants array for the whole population.")
 
-    tsv_file = open("{0}/meta_analysis_{1}.tsv".format(os.getcwd(), args.c), 'w')
-    tsv_file.write('\t'.join(['Population', 'NbrIndividuals', 'NbrStops', 's^2/Va', 'Pvalue', 'Significant']) + '\n')
+    tsv_file = open("{0}/meta_analysis_{1}.tsv".format(os.getcwd(), args.c), 'w') # initialization of the ouput file
+    tsv_file.write('\t'.join(['Population', 'NbrIndividuals', 'NbrStops', 's^2/Va', 'Pvalue', 'Significant']) + '\n') # header of the ouput file
 
     for pop, stop_array in stop_array_dict.items():
         print("{0} population with {1} individuals".format(pop, len(dict_pop[pop])))

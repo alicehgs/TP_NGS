@@ -55,7 +55,7 @@ class Cds(object):
         if position_relative == -1:
             return("", "", "", "")
         
-        # To read the sequence in the good direction
+        # To read the sequence in the right direction
         if self.strand == "-":
             nt_ref = complement[nt_ref]
             nt_alt = complement[nt_alt]
